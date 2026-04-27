@@ -42,6 +42,7 @@
         <item name="primaryShadeColor">@color/whiteInverseTrans10</item>
         <item name="primaryShadeDarkColor">@color/whiteInverseTrans25</item>
         <item name="dialogShadeColor">@color/whiteInverseTrans50</item>
+        <item name="android:fontFamily">sans-serif-light</item>
 
     </style>
 
@@ -56,7 +57,6 @@
         <item name="android:textColor">?attr/primaryColor</item>
         <item name="android:editTextColor">?attr/primaryColor</item>
         <item name="android:textColorHint">?attr/primaryColor</item>
-        <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:inputType">textCapSentences|textNoSuggestions</item>
         <item name="android:cursorVisible">false</item>
     </style>
@@ -71,7 +71,6 @@
     </style>
 
     <style name="TextLarge" parent="TextDefault">
-        <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">@dimen/text_large</item>
     </style>
 
@@ -89,6 +88,34 @@
 
     <style name="TextSmallLight" parent="TextSmall">
         <item name="android:textColor">@drawable/text_colors_light</item>
+    </style>
+
+    <style name="FontOverlayJetBrainsMono" parent="">
+        <item name="android:fontFamily">@font/jetbrains_mono</item>
+    </style>
+
+    <style name="FontOverlayInstrumentSerif" parent="">
+        <item name="android:fontFamily">@font/instrument_serif</item>
+    </style>
+
+    <style name="FontOverlayPermanentMarker" parent="">
+        <item name="android:fontFamily">@font/permanent_marker</item>
+    </style>
+
+    <style name="FontOverlayGoogleSans" parent="">
+        <item name="android:fontFamily">@font/google_sans</item>
+    </style>
+
+    <style name="FontOverlayDsDigital" parent="">
+        <item name="android:fontFamily">@font/ds_digital</item>
+    </style>
+
+    <style name="FontOverlayOxanium" parent="">
+        <item name="android:fontFamily">@font/oxanium</item>
+    </style>
+
+    <style name="FontOverlayDoto" parent="">
+        <item name="android:fontFamily">@font/doto</item>
     </style>
 
 </resources>

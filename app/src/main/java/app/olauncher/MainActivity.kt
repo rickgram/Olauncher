@@ -69,6 +69,20 @@ class MainActivity : AppCompatActivity() {
         if (isEinkDisplay()) prefs.appTheme = AppCompatDelegate.MODE_NIGHT_NO
         AppCompatDelegate.setDefaultNightMode(prefs.appTheme)
         super.onCreate(savedInstanceState)
+
+        val fontPack = Constants.FontPack.resolve(
+            prefs.selectedFontPack, prefs.customClockFont, prefs.customAppsFont, prefs.customEventFont
+        )
+        when (fontPack.appsFont) {
+            Constants.Font.JETBRAINS_MONO -> theme.applyStyle(R.style.FontOverlayJetBrainsMono, true)
+            Constants.Font.INSTRUMENT_SERIF -> theme.applyStyle(R.style.FontOverlayInstrumentSerif, true)
+            Constants.Font.PERMANENT_MARKER -> theme.applyStyle(R.style.FontOverlayPermanentMarker, true)
+            Constants.Font.GOOGLE_SANS -> theme.applyStyle(R.style.FontOverlayGoogleSans, true)
+            Constants.Font.DS_DIGITAL -> theme.applyStyle(R.style.FontOverlayDsDigital, true)
+            Constants.Font.OXANIUM -> theme.applyStyle(R.style.FontOverlayOxanium, true)
+            Constants.Font.DOTO -> theme.applyStyle(R.style.FontOverlayDoto, true)
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

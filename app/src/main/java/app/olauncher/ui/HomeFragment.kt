@@ -1,6 +1,9 @@
 package app.olauncher.ui
 
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
+import android.appwidget.AppWidgetManager
+import app.olauncher.helper.NonAppCompatWidgetHost
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
@@ -16,6 +19,7 @@ import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.bundleOf
@@ -38,6 +42,9 @@ import app.olauncher.helper.getChangedAppTheme
 import app.olauncher.helper.getUserHandleFromString
 import app.olauncher.helper.isPackageInstalled
 import app.olauncher.helper.openAlarmApp
+import app.olauncher.helper.formatCalendarEventText
+import app.olauncher.helper.getNextCalendarEvent
+import app.olauncher.helper.hasCalendarPermission
 import app.olauncher.helper.openCalendar
 import app.olauncher.helper.openCameraApp
 import app.olauncher.helper.openDialerApp
@@ -46,6 +53,9 @@ import app.olauncher.helper.setPlainWallpaperByTheme
 import app.olauncher.helper.showToast
 import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
+import android.graphics.Typeface
+import android.util.Log
+import app.olauncher.helper.getFontTypeface
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,6 +68,39 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var appWidgetHost: NonAppCompatWidgetHost
+    private lateinit var appWidgetManager: AppWidgetManager
+
+    companion object {
+        private const val APPWIDGET_HOST_ID = 1024
+    }
+
+    private var pendingWidgetId = -1
+
+    private val bindWidgetLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val widgetId = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: pendingWidgetId
+        Log.d("OlauncherWidget", "bindWidgetLauncher result: resultCode=${result.resultCode}, widgetId=$widgetId")
+        if (result.resultCode == Activity.RESULT_OK && widgetId != -1) {
+            configureOrAddWidget(widgetId)
+        } else if (widgetId != -1) {
+            Log.d("OlauncherWidget", "Bind denied or failed, deleting widgetId=$widgetId")
+            appWidgetHost.deleteAppWidgetId(widgetId)
+        }
+    }
+
+    private val configureWidgetLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val widgetId = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: prefs.homeWidgetId
+        if (result.resultCode == Activity.RESULT_OK && widgetId != -1) {
+            addWidgetToHome(widgetId)
+        } else if (widgetId != -1) {
+            appWidgetHost.deleteAppWidgetId(widgetId)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -72,11 +115,25 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         } ?: throw Exception("Invalid Activity")
 
         deviceManager = context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        appWidgetManager = AppWidgetManager.getInstance(requireContext())
+        appWidgetHost = NonAppCompatWidgetHost(requireContext(), APPWIDGET_HOST_ID)
 
         initObservers()
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
+        applyFontPack()
+        restoreWidget()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        try { appWidgetHost.startListening() } catch (_: Exception) {}
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try { appWidgetHost.stopListening() } catch (_: Exception) {}
     }
 
     override fun onResume() {
@@ -93,6 +150,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.recents -> {}
             R.id.clock -> openClockApp()
             R.id.date -> openCalendarApp()
+            R.id.nextCalendarEvent -> openCalendarApp()
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
 
@@ -227,18 +285,35 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.recents.setOnClickListener(this)
         binding.clock.setOnClickListener(this)
         binding.date.setOnClickListener(this)
+        binding.nextCalendarEvent.setOnClickListener(this)
         binding.clock.setOnLongClickListener(this)
         binding.date.setOnLongClickListener(this)
         binding.setDefaultLauncher.setOnClickListener(this)
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
         binding.tvScreenTime.setOnLongClickListener(this)
+        binding.widgetContainer.setOnLongClickListener {
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Widget")
+                .setItems(arrayOf("Change Widget", "Remove Widget")) { _, which ->
+                    when (which) {
+                        0 -> launchWidgetPicker()
+                        1 -> removeWidget()
+                    }
+                }
+                .show()
+            true
+        }
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
-        val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
+        val hasWidget = binding.widgetContainer.visibility == View.VISIBLE
+        val verticalGravity = if (hasWidget) Gravity.TOP
+            else if (prefs.homeBottomAlignment) Gravity.BOTTOM
+            else Gravity.CENTER_VERTICAL
         binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
+        binding.nextCalendarEvent.gravity = horizontalGravity
         binding.homeApp1.gravity = horizontalGravity
         binding.homeApp2.gravity = horizontalGravity
         binding.homeApp3.gravity = horizontalGravity
@@ -247,6 +322,42 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.homeApp6.gravity = horizontalGravity
         binding.homeApp7.gravity = horizontalGravity
         binding.homeApp8.gravity = horizontalGravity
+    }
+
+    private fun applyFontPack() {
+        val pack = Constants.FontPack.resolve(
+            prefs.selectedFontPack, prefs.customClockFont, prefs.customAppsFont, prefs.customEventFont
+        )
+        val ctx = requireContext()
+
+        val clockTypeface = getFontTypeface(ctx, pack.clockFont) ?: Typeface.DEFAULT
+        binding.clock.typeface = clockTypeface
+        binding.date.typeface = clockTypeface
+
+        val eventTypeface = getFontTypeface(ctx, pack.eventFont) ?: Typeface.DEFAULT
+        binding.nextCalendarEvent.typeface = eventTypeface
+
+        val baseAppsTypeface = getFontTypeface(ctx, pack.appsFont) ?: Typeface.DEFAULT
+        val appsTypeface = if (pack.appsBold) Typeface.create(baseAppsTypeface, Typeface.BOLD) else baseAppsTypeface
+        listOf(
+            binding.homeApp1, binding.homeApp2, binding.homeApp3, binding.homeApp4,
+            binding.homeApp5, binding.homeApp6, binding.homeApp7, binding.homeApp8
+        ).forEach { it.typeface = appsTypeface }
+    }
+
+    private fun populateNextCalendarEvent() {
+        if (!prefs.showNextCalendarEvent || !hasCalendarPermission(requireContext())) {
+            binding.nextCalendarEvent.visibility = View.GONE
+            return
+        }
+        val event = getNextCalendarEvent(requireContext())
+        if (event != null) {
+            binding.nextCalendarEvent.text = formatCalendarEventText(event)
+            binding.nextCalendarEvent.visibility = View.VISIBLE
+        } else {
+            binding.nextCalendarEvent.text = "No upcoming events"
+            binding.nextCalendarEvent.visibility = View.VISIBLE
+        }
     }
 
     private fun populateDateTime() {
@@ -297,6 +408,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun populateHomeScreen(appCountUpdated: Boolean) {
         if (appCountUpdated) hideHomeApps()
         populateDateTime()
+        populateNextCalendarEvent()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
@@ -650,12 +762,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
             override fun onLongClick() {
                 super.onLongClick()
-                try {
-                    findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
-                    viewModel.firstOpen(false)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                showHomeLongPressMenu()
             }
 
             override fun onDoubleClick() {
@@ -706,6 +813,174 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 textOnClick(view)
             }
         }
+    }
+
+    private fun restoreWidget() {
+        val widgetId = prefs.homeWidgetId
+        Log.d("OlauncherWidget", "restoreWidget: widgetId=$widgetId, showHomeWidget=${prefs.showHomeWidget}")
+        if (widgetId == -1 || !prefs.showHomeWidget) {
+            binding.widgetContainer.visibility = View.GONE
+            updateHomeAppsTopPadding()
+            return
+        }
+        val widgetInfo = appWidgetManager.getAppWidgetInfo(widgetId)
+        Log.d("OlauncherWidget", "restoreWidget: widgetInfo=$widgetInfo")
+        if (widgetInfo == null) {
+            prefs.homeWidgetId = -1
+            prefs.showHomeWidget = false
+            binding.widgetContainer.visibility = View.GONE
+            updateHomeAppsTopPadding()
+            return
+        }
+        val hostView = appWidgetHost.createView(requireContext(), widgetId, widgetInfo)
+        binding.widgetContainer.removeAllViews()
+        binding.widgetContainer.addView(hostView)
+        binding.widgetContainer.visibility = View.VISIBLE
+        updateHomeAppsTopPadding()
+    }
+
+    private fun launchWidgetPicker() {
+        val providers = appWidgetManager.installedProviders
+        if (providers.isEmpty()) {
+            requireContext().showToast("No widgets available")
+            return
+        }
+
+        // Build display names: "App Name - Widget Label"
+        val pm = requireContext().packageManager
+        val labels = providers.map { info ->
+            val appLabel = pm.getApplicationLabel(
+                pm.getApplicationInfo(info.provider.packageName, 0)
+            )
+            val widgetLabel = info.loadLabel(pm)
+            "$appLabel - $widgetLabel"
+        }.toTypedArray()
+
+        // Sort alphabetically and keep indices synced
+        val sortedIndices = labels.indices.sortedBy { labels[it].lowercase() }
+        val sortedLabels = sortedIndices.map { labels[it] }.toTypedArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Select Widget")
+            .setItems(sortedLabels) { _, which ->
+                val provider = providers[sortedIndices[which]]
+                val widgetId = appWidgetHost.allocateAppWidgetId()
+                pendingWidgetId = widgetId
+
+                // Try to bind directly (works if user previously granted permission)
+                if (appWidgetManager.bindAppWidgetIdIfAllowed(widgetId, provider.provider)) {
+                    configureOrAddWidget(widgetId)
+                } else {
+                    // Ask user for bind permission
+                    val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider.provider)
+                    }
+                    bindWidgetLauncher.launch(bindIntent)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun configureOrAddWidget(widgetId: Int) {
+        val widgetInfo = appWidgetManager.getAppWidgetInfo(widgetId)
+        Log.d("OlauncherWidget", "configureOrAddWidget: widgetId=$widgetId, widgetInfo=$widgetInfo, configure=${widgetInfo?.configure}")
+        if (widgetInfo?.configure != null) {
+            configureWidgetLauncher.launch(
+                Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
+                    component = widgetInfo.configure
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                }
+            )
+        } else {
+            addWidgetToHome(widgetId)
+        }
+    }
+
+    private fun addWidgetToHome(widgetId: Int) {
+        Log.d("OlauncherWidget", "addWidgetToHome: widgetId=$widgetId")
+        // Remove old widget if any
+        val oldId = prefs.homeWidgetId
+        if (oldId != -1 && oldId != widgetId) {
+            appWidgetHost.deleteAppWidgetId(oldId)
+        }
+
+        prefs.homeWidgetId = widgetId
+        prefs.showHomeWidget = true
+
+        val widgetInfo = appWidgetManager.getAppWidgetInfo(widgetId)
+        if (widgetInfo == null) {
+            Log.e("OlauncherWidget", "addWidgetToHome: widgetInfo is null for widgetId=$widgetId")
+            return
+        }
+        try {
+            // Use a non-AppCompat context so ImageView doesn't become AppCompatImageView
+            // (RemoteViews can only call setImageResource on plain ImageView)
+            val hostView = appWidgetHost.createView(requireContext(), widgetId, widgetInfo)
+            Log.d("OlauncherWidget", "addWidgetToHome: hostView created successfully, provider=${widgetInfo.provider}")
+            binding.widgetContainer.removeAllViews()
+            binding.widgetContainer.addView(hostView)
+            binding.widgetContainer.visibility = View.VISIBLE
+            updateHomeAppsTopPadding()
+        } catch (e: Exception) {
+            Log.e("OlauncherWidget", "addWidgetToHome: failed to create view", e)
+        }
+    }
+
+    private fun updateHomeAppsTopPadding() {
+        val hasWidget = binding.widgetContainer.visibility == View.VISIBLE
+        Log.d("OlauncherWidget", "updateHomeAppsTopPadding: hasWidget=$hasWidget")
+        val topPadding = if (hasWidget) 370.dpToPx() else 224.dpToPx()
+        binding.homeAppsLayout.setPadding(
+            binding.homeAppsLayout.paddingLeft,
+            topPadding,
+            binding.homeAppsLayout.paddingRight,
+            binding.homeAppsLayout.paddingBottom
+        )
+        // When widget is visible, pin apps to top so gap is predictable;
+        // otherwise restore center_vertical from prefs
+        val verticalGravity = if (hasWidget) Gravity.TOP else {
+            if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
+        }
+        binding.homeAppsLayout.gravity = (prefs.homeAlignment) or verticalGravity
+    }
+
+    private fun showHomeLongPressMenu() {
+        val hasWidget = prefs.homeWidgetId != -1 && prefs.showHomeWidget
+        val items = if (hasWidget) {
+            arrayOf("Settings", "Change Widget", "Remove Widget")
+        } else {
+            arrayOf("Settings", "Add Widget")
+        }
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setItems(items) { _, which ->
+                when {
+                    items[which] == "Settings" -> {
+                        try {
+                            findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
+                            viewModel.firstOpen(false)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    items[which] == "Add Widget" || items[which] == "Change Widget" -> launchWidgetPicker()
+                    items[which] == "Remove Widget" -> removeWidget()
+                }
+            }
+            .show()
+    }
+
+    private fun removeWidget() {
+        val widgetId = prefs.homeWidgetId
+        if (widgetId != -1) {
+            appWidgetHost.deleteAppWidgetId(widgetId)
+        }
+        prefs.homeWidgetId = -1
+        prefs.showHomeWidget = false
+        binding.widgetContainer.removeAllViews()
+        binding.widgetContainer.visibility = View.GONE
+        updateHomeAppsTopPadding()
     }
 
     override fun onDestroyView() {
