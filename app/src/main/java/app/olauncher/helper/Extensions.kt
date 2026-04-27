@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.UserHandle
@@ -18,6 +19,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
+import androidx.core.content.res.ResourcesCompat
 import app.olauncher.BuildConfig
 import app.olauncher.R
 import app.olauncher.data.Constants
@@ -178,4 +180,17 @@ fun Long.hasBeenMinutes(minutes: Int): Boolean =
 
 fun Int.dpToPx(): Int {
     return (this * Resources.getSystem().displayMetrics.density).toInt()
+}
+
+fun getFontTypeface(context: Context, fontId: Int): Typeface? {
+    return when (fontId) {
+        Constants.Font.JETBRAINS_MONO -> ResourcesCompat.getFont(context, R.font.jetbrains_mono)
+        Constants.Font.INSTRUMENT_SERIF -> ResourcesCompat.getFont(context, R.font.instrument_serif)
+        Constants.Font.PERMANENT_MARKER -> ResourcesCompat.getFont(context, R.font.permanent_marker)
+        Constants.Font.GOOGLE_SANS -> ResourcesCompat.getFont(context, R.font.google_sans)
+        Constants.Font.DS_DIGITAL -> ResourcesCompat.getFont(context, R.font.ds_digital)
+        Constants.Font.OXANIUM -> ResourcesCompat.getFont(context, R.font.oxanium)
+        Constants.Font.DOTO -> ResourcesCompat.getFont(context, R.font.doto)
+        else -> null
+    }
 }

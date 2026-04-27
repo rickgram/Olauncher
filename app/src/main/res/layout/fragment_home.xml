@@ -27,8 +27,8 @@
         android:id="@+id/dateTimeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="112dp"
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
@@ -38,7 +38,6 @@
             style="@style/TextDefault"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
             android:format12Hour="h:mm"
             android:textSize="@dimen/time_size"
             tools:text="02:34" />
@@ -53,7 +52,35 @@
             android:paddingHorizontal="3dp"
             android:textSize="@dimen/date_size"
             tools:text="Thu, 30 Dec" />
+
+        <TextView
+            android:id="@+id/nextCalendarEvent"
+            style="@style/TextDefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_calendar"
+            android:drawablePadding="6dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingHorizontal="3dp"
+            android:paddingTop="8dp"
+            android:textSize="@dimen/date_size"
+            android:visibility="gone"
+            tools:text="3:00 PM - Team standup"
+            tools:visibility="visible" />
     </LinearLayout>
+
+    <!-- Widget slot -->
+    <FrameLayout
+        android:id="@+id/widgetContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="260dp"
+        android:minHeight="0dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <!-- Screen time-->
     <androidx.appcompat.widget.AppCompatTextView
@@ -78,8 +105,8 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="112dp"
+        android:paddingHorizontal="40dp"
+        android:paddingTop="224dp"
         android:paddingBottom="48dp">
 
         <TextView

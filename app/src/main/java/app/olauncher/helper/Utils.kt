@@ -51,6 +51,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.text.Collator
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.Scanner
@@ -455,6 +456,78 @@ fun openCalendar(context: Context) {
             e.printStackTrace()
         }
     }
+}
+
+fun hasCalendarPermission(context: Context): Boolean {
+    return context.checkSelfPermission(android.Manifest.permission.READ_CALENDAR) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+}
+
+data class CalendarEvent(val title: String, val startTime: Long, val allDay: Boolean)
+
+fun getNextCalendarEvent(context: Context): CalendarEvent? {
+    if (!hasCalendarPermission(context)) return null
+    try {
+        val now = System.currentTimeMillis()
+        val endRange = now + 3 * 24 * 60 * 60 * 1000L // next 3 days
+
+        val projection = arrayOf(
+            CalendarContract.Instances.TITLE,
+            CalendarContract.Instances.BEGIN,
+            CalendarContract.Instances.ALL_DAY
+        )
+
+        val uri = CalendarContract.Instances.CONTENT_URI.buildUpon()
+            .appendPath(now.toString())
+            .appendPath(endRange.toString())
+            .build()
+
+        val cursor = context.contentResolver.query(
+            uri,
+            projection,
+            null,
+            null,
+            "${CalendarContract.Instances.BEGIN} ASC"
+        )
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val title = it.getString(0) ?: continue
+                val startTime = it.getLong(1)
+                val allDay = it.getInt(2) == 1
+                // Skip all-day events and past events
+                if (!allDay && startTime >= now) {
+                    return CalendarEvent(title, startTime, allDay)
+                }
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+fun formatCalendarEventText(event: CalendarEvent): String {
+    val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+    val timeString = timeFormat.format(Date(event.startTime))
+
+    val now = Calendar.getInstance()
+    val eventCal = Calendar.getInstance().apply { timeInMillis = event.startTime }
+
+    val today = now.get(Calendar.DAY_OF_YEAR)
+    val eventDay = eventCal.get(Calendar.DAY_OF_YEAR)
+    val sameYear = now.get(Calendar.YEAR) == eventCal.get(Calendar.YEAR)
+
+    val prefix = when {
+        sameYear && eventDay == today -> ""
+        sameYear && eventDay == today + 1 -> "Tmrw "
+        else -> {
+            val dateFormat = SimpleDateFormat("M/d", Locale.getDefault())
+            dateFormat.format(Date(event.startTime)) + " "
+        }
+    }
+
+    return "$prefix$timeString - ${event.title}"
 }
 
 fun isAccessServiceEnabled(context: Context): Boolean {

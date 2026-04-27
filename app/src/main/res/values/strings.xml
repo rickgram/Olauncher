@@ -163,4 +163,23 @@
     <string name="new_year_wish_1">It doesn\'t matter how January went. You still have the rest of the year to do better than ever.</string>
     <string name="cheers">Cheers!</string>
     <string name="notification_bar">Notification bar</string>
+    <string name="font">Font</string>
+    <string name="font_system">System</string>
+    <string name="font_jetbrains_mono" translatable="false">JetBrains Mono</string>
+    <string name="font_instrument_serif" translatable="false">Instrument Serif</string>
+    <string name="font_permanent_marker" translatable="false">Permanent Marker</string>
+    <string name="font_google_sans" translatable="false">Google Sans</string>
+    <string name="font_pack_editorial" translatable="false">Editorial</string>
+    <string name="font_pack_tech" translatable="false">Tech</string>
+    <string name="font_pack_casual" translatable="false">Casual</string>
+    <string name="font_pack_custom">Custom</string>
+    <string name="font_pack_neon" translatable="false">Neon</string>
+    <string name="font_ds_digital" translatable="false">DS Digital</string>
+    <string name="font_oxanium" translatable="false">Oxanium</string>
+    <string name="font_doto" translatable="false">Doto</string>
+    <string name="font_zone_clock">Clock</string>
+    <string name="font_zone_apps">Apps</string>
+    <string name="font_zone_events">Events</string>
+    <string name="next_calendar_event">Next calendar event</string>
+    <string name="no_upcoming_events">No upcoming events</string>
 </resources>

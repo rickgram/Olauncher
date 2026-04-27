@@ -4,10 +4,12 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,7 @@ import app.olauncher.helper.animateAlpha
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.getColorFromAttr
 import app.olauncher.helper.isAccessServiceEnabled
+import app.olauncher.helper.hasCalendarPermission
 import app.olauncher.helper.isDarkThemeOn
 import app.olauncher.helper.isEinkDisplay
 import app.olauncher.helper.isOlauncherDefault
@@ -53,6 +56,19 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     private val binding get() = _binding!!
     private val showPentastic = System.currentTimeMillis() % 2 == 0L
 
+    private val calendarPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            prefs.showNextCalendarEvent = true
+            populateCalendarEventOnOff()
+            viewModel.refreshHome(false)
+        } else {
+            prefs.showNextCalendarEvent = false
+            populateCalendarEventOnOff()
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
@@ -74,11 +90,13 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateProMessage()
         populateKeyboardText()
         populateScreenTimeOnOff()
+        populateCalendarEventOnOff()
         populateLockSettings()
         populateHomeButtonRecents()
         populateWallpaperText()
         populateAppThemeText()
         populateTextSize()
+        populateFont()
         populateAlignment()
         populateStatusBar()
         populateDateTime()
@@ -97,6 +115,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.dateTimeSelectLayout.visibility = View.GONE
         binding.appThemeSelectLayout.visibility = View.GONE
         binding.swipeDownSelectLayout.visibility = View.GONE
+        binding.fontSelectLayout  ?.visibility = View.GONE
         if (view.id != R.id.textSizeMinus && view.id != R.id.textSizePlus) {
             if (binding.textSizesLayout.isVisible) {
                 binding.textSizesLayout.visibility = View.GONE
@@ -110,6 +129,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.olauncherHiddenApps -> showHiddenApps()
             R.id.moreFeatures -> viewModel.showDialog.postValue(Constants.Dialog.PRO_MESSAGE)
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
+            R.id.calendarEventOnOff -> toggleCalendarEvent()
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.toggleLock -> toggleLockMode()
@@ -151,6 +171,48 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
             R.id.textSizeMinus -> adjustTextSizePreview(-0.1f)
             R.id.textSizePlus -> adjustTextSizePreview(0.1f)
+
+            R.id.fontValue -> binding.fontSelectLayout?.visibility = View.VISIBLE
+            R.id.fontSystem -> updateFontPack(Constants.FontPack.SYSTEM)
+            R.id.fontJetBrainsMono -> updateFontPack(Constants.FontPack.JETBRAINS_MONO)
+            R.id.fontInstrumentSerif -> updateFontPack(Constants.FontPack.INSTRUMENT_SERIF)
+            R.id.fontPermanentMarker -> updateFontPack(Constants.FontPack.PERMANENT_MARKER)
+            R.id.fontGoogleSans -> updateFontPack(Constants.FontPack.GOOGLE_SANS)
+            R.id.fontEditorial -> updateFontPack(Constants.FontPack.EDITORIAL)
+            R.id.fontTech -> updateFontPack(Constants.FontPack.TECH)
+            R.id.fontCasual -> updateFontPack(Constants.FontPack.CASUAL)
+            R.id.fontNeon -> updateFontPack(Constants.FontPack.NEON)
+            R.id.fontCustom -> updateFontPack(Constants.FontPack.CUSTOM)
+
+            R.id.customClockFontValue -> binding.customClockFontSelectLayout?.visibility = View.VISIBLE
+            R.id.clockFontSystem -> updateCustomFont(0, Constants.Font.SYSTEM)
+            R.id.clockFontJetBrains -> updateCustomFont(0, Constants.Font.JETBRAINS_MONO)
+            R.id.clockFontInstrumentSerif -> updateCustomFont(0, Constants.Font.INSTRUMENT_SERIF)
+            R.id.clockFontPermanentMarker -> updateCustomFont(0, Constants.Font.PERMANENT_MARKER)
+            R.id.clockFontGoogleSans -> updateCustomFont(0, Constants.Font.GOOGLE_SANS)
+            R.id.clockFontDsDigital -> updateCustomFont(0, Constants.Font.DS_DIGITAL)
+            R.id.clockFontOxanium -> updateCustomFont(0, Constants.Font.OXANIUM)
+            R.id.clockFontDoto -> updateCustomFont(0, Constants.Font.DOTO)
+
+            R.id.customAppsFontValue -> binding.customAppsFontSelectLayout?.visibility = View.VISIBLE
+            R.id.appsFontSystem -> updateCustomFont(1, Constants.Font.SYSTEM)
+            R.id.appsFontJetBrains -> updateCustomFont(1, Constants.Font.JETBRAINS_MONO)
+            R.id.appsFontInstrumentSerif -> updateCustomFont(1, Constants.Font.INSTRUMENT_SERIF)
+            R.id.appsFontPermanentMarker -> updateCustomFont(1, Constants.Font.PERMANENT_MARKER)
+            R.id.appsFontGoogleSans -> updateCustomFont(1, Constants.Font.GOOGLE_SANS)
+            R.id.appsFontDsDigital -> updateCustomFont(1, Constants.Font.DS_DIGITAL)
+            R.id.appsFontOxanium -> updateCustomFont(1, Constants.Font.OXANIUM)
+            R.id.appsFontDoto -> updateCustomFont(1, Constants.Font.DOTO)
+
+            R.id.customEventFontValue -> binding.customEventFontSelectLayout?.visibility = View.VISIBLE
+            R.id.eventFontSystem -> updateCustomFont(2, Constants.Font.SYSTEM)
+            R.id.eventFontJetBrains -> updateCustomFont(2, Constants.Font.JETBRAINS_MONO)
+            R.id.eventFontInstrumentSerif -> updateCustomFont(2, Constants.Font.INSTRUMENT_SERIF)
+            R.id.eventFontPermanentMarker -> updateCustomFont(2, Constants.Font.PERMANENT_MARKER)
+            R.id.eventFontGoogleSans -> updateCustomFont(2, Constants.Font.GOOGLE_SANS)
+            R.id.eventFontDsDigital -> updateCustomFont(2, Constants.Font.DS_DIGITAL)
+            R.id.eventFontOxanium -> updateCustomFont(2, Constants.Font.OXANIUM)
+            R.id.eventFontDoto -> updateCustomFont(2, Constants.Font.DOTO)
 
             R.id.swipeLeftApp -> showAppListIfEnabled(Constants.FLAG_SET_SWIPE_LEFT_APP)
             R.id.swipeRightApp -> showAppListIfEnabled(Constants.FLAG_SET_SWIPE_RIGHT_APP)
@@ -213,6 +275,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeButtonRecents.setOnClickListener(this)
         binding.homeAppsNum.setOnClickListener(this)
         binding.screenTimeOnOff.setOnClickListener(this)
+        binding.calendarEventOnOff.setOnClickListener(this)
         binding.dailyWallpaperUrl.setOnClickListener(this)
         binding.dailyWallpaper.setOnClickListener(this)
         binding.alignment.setOnClickListener(this)
@@ -258,6 +321,48 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         binding.textSizeMinus.setOnClickListener(this)
         binding.textSizePlus.setOnClickListener(this)
+
+        binding.fontValue?.setOnClickListener(this)
+        binding.fontSystem?.setOnClickListener(this)
+        binding.fontJetBrainsMono?.setOnClickListener(this)
+        binding.fontInstrumentSerif?.setOnClickListener(this)
+        binding.fontPermanentMarker?.setOnClickListener(this)
+        binding.fontGoogleSans?.setOnClickListener(this)
+        binding.fontEditorial?.setOnClickListener(this)
+        binding.fontTech?.setOnClickListener(this)
+        binding.fontCasual?.setOnClickListener(this)
+        binding.fontNeon?.setOnClickListener(this)
+        binding.fontCustom?.setOnClickListener(this)
+
+        binding.customClockFontValue?.setOnClickListener(this)
+        binding.clockFontSystem?.setOnClickListener(this)
+        binding.clockFontJetBrains?.setOnClickListener(this)
+        binding.clockFontInstrumentSerif?.setOnClickListener(this)
+        binding.clockFontPermanentMarker?.setOnClickListener(this)
+        binding.clockFontGoogleSans?.setOnClickListener(this)
+        binding.clockFontDsDigital?.setOnClickListener(this)
+        binding.clockFontOxanium?.setOnClickListener(this)
+        binding.clockFontDoto?.setOnClickListener(this)
+
+        binding.customAppsFontValue?.setOnClickListener(this)
+        binding.appsFontSystem?.setOnClickListener(this)
+        binding.appsFontJetBrains?.setOnClickListener(this)
+        binding.appsFontInstrumentSerif?.setOnClickListener(this)
+        binding.appsFontPermanentMarker?.setOnClickListener(this)
+        binding.appsFontGoogleSans?.setOnClickListener(this)
+        binding.appsFontDsDigital?.setOnClickListener(this)
+        binding.appsFontOxanium?.setOnClickListener(this)
+        binding.appsFontDoto?.setOnClickListener(this)
+
+        binding.customEventFontValue?.setOnClickListener(this)
+        binding.eventFontSystem?.setOnClickListener(this)
+        binding.eventFontJetBrains?.setOnClickListener(this)
+        binding.eventFontInstrumentSerif?.setOnClickListener(this)
+        binding.eventFontPermanentMarker?.setOnClickListener(this)
+        binding.eventFontGoogleSans?.setOnClickListener(this)
+        binding.eventFontDsDigital?.setOnClickListener(this)
+        binding.eventFontOxanium?.setOnClickListener(this)
+        binding.eventFontDoto?.setOnClickListener(this)
 
         binding.dailyWallpaper.setOnLongClickListener(this)
         binding.alignment.setOnLongClickListener(this)
@@ -546,6 +651,29 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.textSizeCurrent.text = formatted
     }
 
+    private fun toggleCalendarEvent() {
+        if (prefs.showNextCalendarEvent) {
+            prefs.showNextCalendarEvent = false
+            populateCalendarEventOnOff()
+            viewModel.refreshHome(false)
+        } else {
+            if (hasCalendarPermission(requireContext())) {
+                prefs.showNextCalendarEvent = true
+                populateCalendarEventOnOff()
+                viewModel.refreshHome(false)
+            } else {
+                calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+            }
+        }
+    }
+
+    private fun populateCalendarEventOnOff() {
+        binding.calendarEventOnOff.text = getString(
+            if (prefs.showNextCalendarEvent && hasCalendarPermission(requireContext())) R.string.on
+            else R.string.off
+        )
+    }
+
     private fun populateScreenTimeOnOff() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (requireContext().appUsagePermissionGranted()) binding.screenTimeOnOff.text = getString(R.string.on)
@@ -656,6 +784,80 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.action_settingsFragment_to_appListFragment,
             bundleOf(Constants.Key.FLAG to flag)
         )
+    }
+
+    private fun updateFontPack(packId: Int) {
+        if (prefs.selectedFontPack == packId) return
+        prefs.selectedFontPack = packId
+        binding.fontSelectLayout?.visibility = View.GONE
+        if (packId == Constants.FontPack.CUSTOM) {
+            binding.customFontLayout?.visibility = View.VISIBLE
+            populateCustomFontValues()
+        } else {
+            binding.customFontLayout?.visibility = View.GONE
+        }
+        requireActivity().recreate()
+    }
+
+    private fun updateCustomFont(zone: Int, fontId: Int) {
+        when (zone) {
+            0 -> {
+                if (prefs.customClockFont == fontId) return
+                prefs.customClockFont = fontId
+                binding.customClockFontSelectLayout?.visibility = View.GONE
+            }
+            1 -> {
+                if (prefs.customAppsFont == fontId) return
+                prefs.customAppsFont = fontId
+                binding.customAppsFontSelectLayout?.visibility = View.GONE
+            }
+            2 -> {
+                if (prefs.customEventFont == fontId) return
+                prefs.customEventFont = fontId
+                binding.customEventFontSelectLayout?.visibility = View.GONE
+            }
+        }
+        requireActivity().recreate()
+    }
+
+    private fun fontName(fontId: Int): String {
+        return when (fontId) {
+            Constants.Font.JETBRAINS_MONO -> getString(R.string.font_jetbrains_mono)
+            Constants.Font.INSTRUMENT_SERIF -> getString(R.string.font_instrument_serif)
+            Constants.Font.PERMANENT_MARKER -> getString(R.string.font_permanent_marker)
+            Constants.Font.GOOGLE_SANS -> getString(R.string.font_google_sans)
+            Constants.Font.DS_DIGITAL -> getString(R.string.font_ds_digital)
+            Constants.Font.OXANIUM -> getString(R.string.font_oxanium)
+            Constants.Font.DOTO -> getString(R.string.font_doto)
+            else -> getString(R.string.font_system)
+        }
+    }
+
+    private fun populateFont() {
+        binding.fontValue?.text = when (prefs.selectedFontPack) {
+            Constants.FontPack.JETBRAINS_MONO -> getString(R.string.font_jetbrains_mono)
+            Constants.FontPack.INSTRUMENT_SERIF -> getString(R.string.font_instrument_serif)
+            Constants.FontPack.PERMANENT_MARKER -> getString(R.string.font_permanent_marker)
+            Constants.FontPack.GOOGLE_SANS -> getString(R.string.font_google_sans)
+            Constants.FontPack.EDITORIAL -> getString(R.string.font_pack_editorial)
+            Constants.FontPack.TECH -> getString(R.string.font_pack_tech)
+            Constants.FontPack.CASUAL -> getString(R.string.font_pack_casual)
+            Constants.FontPack.NEON -> getString(R.string.font_pack_neon)
+            Constants.FontPack.CUSTOM -> getString(R.string.font_pack_custom)
+            else -> getString(R.string.font_system)
+        }
+        if (prefs.selectedFontPack == Constants.FontPack.CUSTOM) {
+            binding.customFontLayout?.visibility = View.VISIBLE
+            populateCustomFontValues()
+        } else {
+            binding.customFontLayout?.visibility = View.GONE
+        }
+    }
+
+    private fun populateCustomFontValues() {
+        binding.customClockFontValue?.text = fontName(prefs.customClockFont)
+        binding.customAppsFontValue?.text = fontName(prefs.customAppsFont)
+        binding.customEventFontValue?.text = fontName(prefs.customEventFont)
     }
 
     private fun populateActionHints() {

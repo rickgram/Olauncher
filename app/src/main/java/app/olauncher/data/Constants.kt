@@ -116,4 +116,50 @@ object Constants {
     const val DIGITAL_WELLBEING_SAMSUNG_PACKAGE_NAME = "com.samsung.android.forest"
     const val DIGITAL_WELLBEING_SAMSUNG_ACTIVITY = "com.samsung.android.forest.launcher.LauncherActivity"
     const val WALLPAPER_WORKER_NAME = "WALLPAPER_WORKER_NAME"
+    object Font {
+        const val SYSTEM = 0
+        const val JETBRAINS_MONO = 1
+        const val INSTRUMENT_SERIF = 2
+        const val PERMANENT_MARKER = 3
+        const val GOOGLE_SANS = 4
+        const val DS_DIGITAL = 5
+        const val OXANIUM = 6
+        const val DOTO = 7
+    }
+
+    data class FontPackDef(
+        val clockFont: Int,
+        val appsFont: Int,
+        val eventFont: Int,
+        val appsBold: Boolean = false,
+    )
+
+    object FontPack {
+        const val SYSTEM = 0
+        const val JETBRAINS_MONO = 1
+        const val INSTRUMENT_SERIF = 2
+        const val PERMANENT_MARKER = 3
+        const val GOOGLE_SANS = 4
+        const val EDITORIAL = 5
+        const val TECH = 6
+        const val CASUAL = 7
+        const val CUSTOM = 8
+        const val NEON = 9
+
+        fun resolve(packId: Int, customClock: Int = Font.SYSTEM, customApps: Int = Font.SYSTEM, customEvent: Int = Font.SYSTEM): FontPackDef {
+            return when (packId) {
+                SYSTEM -> FontPackDef(Font.SYSTEM, Font.SYSTEM, Font.SYSTEM)
+                JETBRAINS_MONO -> FontPackDef(Font.JETBRAINS_MONO, Font.JETBRAINS_MONO, Font.JETBRAINS_MONO)
+                INSTRUMENT_SERIF -> FontPackDef(Font.INSTRUMENT_SERIF, Font.INSTRUMENT_SERIF, Font.INSTRUMENT_SERIF)
+                PERMANENT_MARKER -> FontPackDef(Font.PERMANENT_MARKER, Font.PERMANENT_MARKER, Font.PERMANENT_MARKER)
+                GOOGLE_SANS -> FontPackDef(Font.GOOGLE_SANS, Font.GOOGLE_SANS, Font.GOOGLE_SANS)
+                EDITORIAL -> FontPackDef(Font.INSTRUMENT_SERIF, Font.GOOGLE_SANS, Font.JETBRAINS_MONO)
+                TECH -> FontPackDef(Font.JETBRAINS_MONO, Font.GOOGLE_SANS, Font.JETBRAINS_MONO)
+                CASUAL -> FontPackDef(Font.PERMANENT_MARKER, Font.GOOGLE_SANS, Font.INSTRUMENT_SERIF)
+                NEON -> FontPackDef(Font.DS_DIGITAL, Font.DOTO, Font.DS_DIGITAL, appsBold = true)
+                CUSTOM -> FontPackDef(customClock, customApps, customEvent)
+                else -> FontPackDef(Font.SYSTEM, Font.SYSTEM, Font.SYSTEM)
+            }
+        }
+    }
 }

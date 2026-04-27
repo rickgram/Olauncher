@@ -43,6 +43,14 @@ class Prefs(context: Context) {
     private val LAUNCHER_RESTART_TIMESTAMP = "LAUNCHER_RECREATE_TIMESTAMP"
     private val SHOWN_ON_DAY_OF_YEAR = "SHOWN_ON_DAY_OF_YEAR"
     private val HOME_BUTTON_SHOW_RECENTS = "HOME_BUTTON_SHOW_RECENTS"
+    private val SELECTED_FONT = "SELECTED_FONT"
+    private val SELECTED_FONT_PACK = "SELECTED_FONT_PACK"
+    private val CUSTOM_CLOCK_FONT = "CUSTOM_CLOCK_FONT"
+    private val CUSTOM_APPS_FONT = "CUSTOM_APPS_FONT"
+    private val CUSTOM_EVENT_FONT = "CUSTOM_EVENT_FONT"
+    private val SHOW_NEXT_CALENDAR_EVENT = "SHOW_NEXT_CALENDAR_EVENT"
+    private val HOME_WIDGET_ID = "HOME_WIDGET_ID"
+    private val SHOW_HOME_WIDGET = "SHOW_HOME_WIDGET"
 
     private val APP_NAME_1 = "APP_NAME_1"
     private val APP_NAME_2 = "APP_NAME_2"
@@ -222,6 +230,34 @@ class Prefs(context: Context) {
     var homeButtonShowRecents: Boolean
         get() = prefs.getBoolean(HOME_BUTTON_SHOW_RECENTS, false)
         set(value) = prefs.edit { putBoolean(HOME_BUTTON_SHOW_RECENTS, value).apply() }
+
+    var selectedFont: Int
+        get() = prefs.getInt(SELECTED_FONT, Constants.Font.SYSTEM)
+        set(value) = prefs.edit { putInt(SELECTED_FONT, value).apply() }
+
+    var selectedFontPack: Int
+        get() {
+            val packPref = prefs.getInt(SELECTED_FONT_PACK, -1)
+            if (packPref != -1) return packPref
+            return prefs.getInt(SELECTED_FONT, Constants.Font.SYSTEM)
+        }
+        set(value) = prefs.edit { putInt(SELECTED_FONT_PACK, value).apply() }
+
+    var customClockFont: Int
+        get() = prefs.getInt(CUSTOM_CLOCK_FONT, Constants.Font.SYSTEM)
+        set(value) = prefs.edit { putInt(CUSTOM_CLOCK_FONT, value).apply() }
+
+    var customAppsFont: Int
+        get() = prefs.getInt(CUSTOM_APPS_FONT, Constants.Font.SYSTEM)
+        set(value) = prefs.edit { putInt(CUSTOM_APPS_FONT, value).apply() }
+
+    var customEventFont: Int
+        get() = prefs.getInt(CUSTOM_EVENT_FONT, Constants.Font.SYSTEM)
+        set(value) = prefs.edit { putInt(CUSTOM_EVENT_FONT, value).apply() }
+
+    var showNextCalendarEvent: Boolean
+        get() = prefs.getBoolean(SHOW_NEXT_CALENDAR_EVENT, false)
+        set(value) = prefs.edit { putBoolean(SHOW_NEXT_CALENDAR_EVENT, value).apply() }
 
     var hiddenApps: MutableSet<String>
         get() = prefs.getStringSet(HIDDEN_APPS, mutableSetOf()) as MutableSet<String>
@@ -638,6 +674,14 @@ class Prefs(context: Context) {
         if (appPackageSwipeLeft == packageName) appActivityClassNameSwipeLeft = activityClassName
         if (appPackageSwipeRight == packageName) appActivityClassNameRight = activityClassName
     }
+
+    var homeWidgetId: Int
+        get() = prefs.getInt(HOME_WIDGET_ID, -1)
+        set(value) = prefs.edit { putInt(HOME_WIDGET_ID, value).apply() }
+
+    var showHomeWidget: Boolean
+        get() = prefs.getBoolean(SHOW_HOME_WIDGET, false)
+        set(value) = prefs.edit { putBoolean(SHOW_HOME_WIDGET, value).apply() }
 
     fun getAppRenameLabel(appPackage: String): String = prefs.getString(appPackage, "").toString()
 

@@ -39,7 +39,6 @@
             style="@style/TextDefault"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
             android:format12Hour="h:mm"
             android:textSize="@dimen/time_size"
             tools:text="02:34" />
@@ -54,6 +53,23 @@
             android:paddingHorizontal="3dp"
             android:textSize="@dimen/date_size"
             tools:text="Thu, 30 Dec" />
+
+        <TextView
+            android:id="@+id/nextCalendarEvent"
+            style="@style/TextDefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_calendar"
+            android:drawablePadding="6dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingHorizontal="3dp"
+            android:paddingTop="2dp"
+            android:textSize="@dimen/date_size"
+            android:visibility="gone"
+            tools:text="3:00 PM - Team standup"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <!-- Screen time-->
@@ -70,6 +86,17 @@
         android:textSize="@dimen/date_size"
         android:visibility="gone"
         tools:text="2h 11m"
+        tools:visibility="visible" />
+
+    <!-- Widget slot -->
+    <FrameLayout
+        android:id="@+id/widgetContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="140dp"
+        android:minHeight="0dp"
+        android:visibility="gone"
         tools:visibility="visible" />
 
     <!-- Home apps-->

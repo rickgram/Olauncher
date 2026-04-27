@@ -469,6 +469,34 @@
 
                 </FrameLayout>
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp"
+                    android:animateLayoutChanges="true">
+
+                    <TextView
+                        style="@style/TextSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingVertical="8dp"
+                        android:text="@string/next_calendar_event"
+                        android:textColor="?attr/primaryColor" />
+
+                    <TextView
+                        android:id="@+id/calendarEventOnOff"
+                        style="@style/TextSmallBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="4dp"
+                        android:padding="8dp"
+                        android:text="@string/off" />
+
+                </FrameLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -730,6 +758,365 @@
                     </LinearLayout>
 
                 </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp"
+                    android:animateLayoutChanges="true"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <TextView
+                        style="@style/TextSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingVertical="8dp"
+                        android:text="@string/font"
+                        android:textColor="?attr/primaryColor" />
+
+                    <TextView
+                        android:id="@+id/fontValue"
+                        style="@style/TextSmallBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="4dp"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="24dp"
+                        android:paddingEnd="8dp"
+                        tools:text="System" />
+
+                    <!-- Font pack select layout -->
+                    <HorizontalScrollView
+                        android:id="@+id/fontSelectLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
+                        android:background="@drawable/rounded_primary_gradient"
+                        android:elevation="8dp"
+                        android:fadingEdgeLength="8dp"
+                        android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                        android:outlineSpotShadowColor="@color/colorPrimaryDark"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="2dp"
+                        android:requiresFadingEdge="horizontal"
+                        android:visibility="gone"
+                        tools:ignore="UnusedAttribute">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/fontSystem"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_system" />
+
+                            <TextView
+                                android:id="@+id/fontJetBrainsMono"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_jetbrains_mono" />
+
+                            <TextView
+                                android:id="@+id/fontInstrumentSerif"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_instrument_serif" />
+
+                            <TextView
+                                android:id="@+id/fontPermanentMarker"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_permanent_marker" />
+
+                            <TextView
+                                android:id="@+id/fontGoogleSans"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_google_sans" />
+
+                            <TextView
+                                android:id="@+id/fontEditorial"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_pack_editorial" />
+
+                            <TextView
+                                android:id="@+id/fontTech"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_pack_tech" />
+
+                            <TextView
+                                android:id="@+id/fontCasual"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_pack_casual" />
+
+                            <TextView
+                                android:id="@+id/fontNeon"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_pack_neon" />
+
+                            <TextView
+                                android:id="@+id/fontCustom"
+                                style="@style/TextSmallBold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:paddingVertical="6dp"
+                                android:text="@string/font_pack_custom" />
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                </FrameLayout>
+
+                <!-- Custom font zone pickers -->
+                <LinearLayout
+                    android:id="@+id/customFontLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="4dp"
+                    android:visibility="gone">
+
+                    <!-- Clock font -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:animateLayoutChanges="true"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <TextView
+                            style="@style/TextSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:paddingVertical="6dp"
+                            android:text="@string/font_zone_clock"
+                            android:textColor="?attr/primaryColor" />
+
+                        <TextView
+                            android:id="@+id/customClockFontValue"
+                            style="@style/TextSmallBold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="4dp"
+                            android:paddingVertical="6dp"
+                            android:paddingStart="24dp"
+                            android:paddingEnd="8dp"
+                            tools:text="System" />
+
+                        <HorizontalScrollView
+                            android:id="@+id/customClockFontSelectLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/rounded_primary_gradient"
+                            android:elevation="8dp"
+                            android:fadingEdgeLength="8dp"
+                            android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                            android:outlineSpotShadowColor="@color/colorPrimaryDark"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="2dp"
+                            android:requiresFadingEdge="horizontal"
+                            android:visibility="gone"
+                            tools:ignore="UnusedAttribute">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView android:id="@+id/clockFontSystem" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_system" />
+                                <TextView android:id="@+id/clockFontJetBrains" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_jetbrains_mono" />
+                                <TextView android:id="@+id/clockFontInstrumentSerif" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_instrument_serif" />
+                                <TextView android:id="@+id/clockFontPermanentMarker" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_permanent_marker" />
+                                <TextView android:id="@+id/clockFontGoogleSans" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_google_sans" />
+                                <TextView android:id="@+id/clockFontDsDigital" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_ds_digital" />
+                                <TextView android:id="@+id/clockFontOxanium" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_oxanium" />
+                                <TextView android:id="@+id/clockFontDoto" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_doto" />
+
+                            </LinearLayout>
+                        </HorizontalScrollView>
+
+                    </FrameLayout>
+
+                    <!-- Apps font -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:animateLayoutChanges="true"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <TextView
+                            style="@style/TextSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:paddingVertical="6dp"
+                            android:text="@string/font_zone_apps"
+                            android:textColor="?attr/primaryColor" />
+
+                        <TextView
+                            android:id="@+id/customAppsFontValue"
+                            style="@style/TextSmallBold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="4dp"
+                            android:paddingVertical="6dp"
+                            android:paddingStart="24dp"
+                            android:paddingEnd="8dp"
+                            tools:text="System" />
+
+                        <HorizontalScrollView
+                            android:id="@+id/customAppsFontSelectLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/rounded_primary_gradient"
+                            android:elevation="8dp"
+                            android:fadingEdgeLength="8dp"
+                            android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                            android:outlineSpotShadowColor="@color/colorPrimaryDark"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="2dp"
+                            android:requiresFadingEdge="horizontal"
+                            android:visibility="gone"
+                            tools:ignore="UnusedAttribute">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView android:id="@+id/appsFontSystem" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_system" />
+                                <TextView android:id="@+id/appsFontJetBrains" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_jetbrains_mono" />
+                                <TextView android:id="@+id/appsFontInstrumentSerif" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_instrument_serif" />
+                                <TextView android:id="@+id/appsFontPermanentMarker" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_permanent_marker" />
+                                <TextView android:id="@+id/appsFontGoogleSans" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_google_sans" />
+                                <TextView android:id="@+id/appsFontDsDigital" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_ds_digital" />
+                                <TextView android:id="@+id/appsFontOxanium" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_oxanium" />
+                                <TextView android:id="@+id/appsFontDoto" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_doto" />
+
+                            </LinearLayout>
+                        </HorizontalScrollView>
+
+                    </FrameLayout>
+
+                    <!-- Events font -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:animateLayoutChanges="true"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <TextView
+                            style="@style/TextSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:paddingVertical="6dp"
+                            android:text="@string/font_zone_events"
+                            android:textColor="?attr/primaryColor" />
+
+                        <TextView
+                            android:id="@+id/customEventFontValue"
+                            style="@style/TextSmallBold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="4dp"
+                            android:paddingVertical="6dp"
+                            android:paddingStart="24dp"
+                            android:paddingEnd="8dp"
+                            tools:text="System" />
+
+                        <HorizontalScrollView
+                            android:id="@+id/customEventFontSelectLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/rounded_primary_gradient"
+                            android:elevation="8dp"
+                            android:fadingEdgeLength="8dp"
+                            android:outlineAmbientShadowColor="@color/colorPrimaryDark"
+                            android:outlineSpotShadowColor="@color/colorPrimaryDark"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="2dp"
+                            android:requiresFadingEdge="horizontal"
+                            android:visibility="gone"
+                            tools:ignore="UnusedAttribute">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView android:id="@+id/eventFontSystem" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_system" />
+                                <TextView android:id="@+id/eventFontJetBrains" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_jetbrains_mono" />
+                                <TextView android:id="@+id/eventFontInstrumentSerif" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_instrument_serif" />
+                                <TextView android:id="@+id/eventFontPermanentMarker" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_permanent_marker" />
+                                <TextView android:id="@+id/eventFontGoogleSans" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_google_sans" />
+                                <TextView android:id="@+id/eventFontDsDigital" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_ds_digital" />
+                                <TextView android:id="@+id/eventFontOxanium" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="20dp" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_oxanium" />
+                                <TextView android:id="@+id/eventFontDoto" style="@style/TextSmallBold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:paddingVertical="6dp" android:text="@string/font_doto" />
+
+                            </LinearLayout>
+                        </HorizontalScrollView>
+
+                    </FrameLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 
